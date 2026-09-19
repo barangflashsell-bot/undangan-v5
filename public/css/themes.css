@@ -1,0 +1,181 @@
+/* Themes Engine for Undangan Digital V5 */
+
+/* Base Invitation Layout */
+.theme-container {
+  max-width: 480px;
+  margin: 0 auto;
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+  box-shadow: 0 0 50px rgba(0,0,0,0.15);
+  background-color: var(--t-bg);
+  color: var(--t-text);
+  font-family: var(--t-font-body);
+  transition: background 0.4s ease, color 0.4s ease;
+}
+
+/* ==========================================================================
+   THEME 1: ISLAMI EMERALD (Nuansa Islami Zamrud & Emas Mewah)
+   ========================================================================== */
+body[data-theme="islami-emerald"] {
+  --t-primary: #064e3b;
+  --t-primary-light: #065f46;
+  --t-accent: #d97706;
+  --t-accent-gold: #f59e0b;
+  --t-accent-light: #fef3c7;
+  --t-bg: #fcfbf7;
+  --t-card-bg: #ffffff;
+  --t-card-border: #e9e4d4;
+  --t-text: #1c2e26;
+  --t-text-muted: #5c7065;
+  --t-font-title: 'Playfair Display', serif;
+  --t-font-body: 'Plus Jakarta Sans', sans-serif;
+  --t-font-script: 'Great Vibes', cursive;
+  --t-cover-gradient: linear-gradient(180deg, rgba(6,78,59,0.85) 0%, rgba(6,78,59,0.95) 100%);
+  --t-ornament-color: #d97706;
+  --t-btn-bg: linear-gradient(135deg, #d97706, #b45309);
+  --t-btn-text: #ffffff;
+}
+
+/* ==========================================================================
+   THEME 2: ROSE GOLD (Romantic Blush & Luxury Rose Gold)
+   ========================================================================== */
+body[data-theme="rose-gold"] {
+  --t-primary: #881337;
+  --t-primary-light: #9f1239;
+  --t-accent: #e11d48;
+  --t-accent-gold: #fb7185;
+  --t-accent-light: #ffe4e6;
+  --t-bg: #fff5f6;
+  --t-card-bg: #ffffff;
+  --t-card-border: #fecdd3;
+  --t-text: #4c0519;
+  --t-text-muted: #83273c;
+  --t-font-title: 'Playfair Display', serif;
+  --t-font-body: 'Plus Jakarta Sans', sans-serif;
+  --t-font-script: 'Great Vibes', cursive;
+  --t-cover-gradient: linear-gradient(180deg, rgba(136,19,55,0.85) 0%, rgba(76,5,25,0.95) 100%);
+  --t-ornament-color: #fb7185;
+  --t-btn-bg: linear-gradient(135deg, #e11d48, #be123c);
+  --t-btn-text: #ffffff;
+}
+
+/* ==========================================================================
+   THEME 3: MODERN MINIMALIST (Sleek Slate Luxury)
+   ========================================================================== */
+body[data-theme="modern-minimalist"] {
+  --t-primary: #0f172a;
+  --t-primary-light: #1e293b;
+  --t-accent: #64748b;
+  --t-accent-gold: #94a3b8;
+  --t-accent-light: #f1f5f9;
+  --t-bg: #f8fafc;
+  --t-card-bg: #ffffff;
+  --t-card-border: #e2e8f0;
+  --t-text: #0f172a;
+  --t-text-muted: #64748b;
+  --t-font-title: 'Playfair Display', serif;
+  --t-font-body: 'Plus Jakarta Sans', sans-serif;
+  --t-font-script: 'Great Vibes', cursive;
+  --t-cover-gradient: linear-gradient(180deg, rgba(15,23,42,0.88) 0%, rgba(15,23,42,0.98) 100%);
+  --t-ornament-color: #64748b;
+  --t-btn-bg: linear-gradient(135deg, #0f172a, #334155);
+  --t-btn-text: #ffffff;
+}
+
+/* ==========================================================================
+   THEME 4: RUSTIC FLORA (Warm Botanical & Terracotta Sand)
+   ========================================================================== */
+body[data-theme="rustic-flora"] {
+  --t-primary: #7c2d12;
+  --t-primary-light: #9a3412;
+  --t-accent: #c2410c;
+  --t-accent-gold: #d97706;
+  --t-accent-light: #ffedd5;
+  --t-bg: #fefce8;
+  --t-card-bg: #ffffff;
+  --t-card-border: #fed7aa;
+  --t-text: #431407;
+  --t-text-muted: #78350f;
+  --t-font-title: 'Playfair Display', serif;
+  --t-font-body: 'Plus Jakarta Sans', sans-serif;
+  --t-font-script: 'Great Vibes', cursive;
+  --t-cover-gradient: linear-gradient(180deg, rgba(124,45,18,0.85) 0%, rgba(67,20,7,0.95) 100%);
+  --t-ornament-color: #c2410c;
+  --t-btn-bg: linear-gradient(135deg, #c2410c, #9a3412);
+  --t-btn-text: #ffffff;
+}
+
+/* Section Components */
+.t-section {
+  padding: 45px 24px;
+  position: relative;
+  text-align: center;
+}
+
+.t-section-alt {
+  background-color: rgba(0,0,0,0.02);
+}
+
+.t-ornament {
+  width: 70px;
+  height: 2px;
+  background: var(--t-ornament-color);
+  margin: 12px auto 24px;
+  position: relative;
+}
+.t-ornament::before, .t-ornament::after {
+  content: '♦';
+  position: absolute;
+  top: -8px;
+  font-size: 11px;
+  color: var(--t-ornament-color);
+}
+.t-ornament::before { left: -10px; }
+.t-ornament::after { right: -10px; }
+
+.t-card {
+  background: var(--t-card-bg);
+  border: 1px solid var(--t-card-border);
+  border-radius: 16px;
+  padding: 24px 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+}
+
+.t-title {
+  font-family: var(--t-font-title);
+  color: var(--t-primary);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.t-subtitle {
+  font-family: var(--t-font-script);
+  color: var(--t-accent);
+  font-size: 2rem;
+  line-height: 1.2;
+}
+
+.t-btn {
+  background: var(--t-btn-bg);
+  color: var(--t-btn-text);
+  border: none;
+  border-radius: 9999px;
+  padding: 12px 28px;
+  font-weight: 600;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+.t-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.2);
+}
+.t-btn:active {
+  transform: scale(0.98);
+}

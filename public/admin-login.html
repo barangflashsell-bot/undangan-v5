@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Login - Undangan Digital</title>
+  <link rel="stylesheet" href="/css/common.css">
+  <style>
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      padding: 20px;
+    }
+    .login-card {
+      width: 100%;
+      max-width: 400px;
+      background: #ffffff;
+      border-radius: 20px;
+      padding: 36px 30px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    }
+    .login-header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+    .login-header h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #0f172a;
+      margin-top: 10px;
+    }
+    .login-header p {
+      font-size: 0.875rem;
+      color: #64748b;
+      margin-top: 4px;
+    }
+    .badge-admin {
+      display: inline-block;
+      padding: 4px 12px;
+      background: #ecfdf5;
+      color: #059669;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+    .error-msg {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #dc2626;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      margin-bottom: 16px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="login-card">
+    <div class="login-header">
+      <span class="badge-admin">Admin Portal</span>
+      <h1>Masuk ke Sistem</h1>
+      <p>Kelola undangan, tema, dan akses penyewa</p>
+    </div>
+
+    <div id="errorBox" class="error-msg"></div>
+
+    <form id="loginForm">
+      <div class="form-group">
+        <label class="form-label" for="username">ID Admin</label>
+        <input type="text" id="username" class="form-input" placeholder="Masukkan ID Admin" required autofocus value="admin">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="password">Sandi Admin</label>
+        <input type="password" id="password" class="form-input" placeholder="Masukkan Sandi Admin" required value="admin123">
+      </div>
+
+      <button type="submit" id="submitBtn" class="btn btn-primary" style="width: 100%; margin-top: 10px; padding: 12px;">
+        Masuk Dashboard
+      </button>
+    </form>
+
+    <div style="margin-top: 24px; text-align: center; border-top: 1px solid #e2e8f0; padding-top: 16px;">
+      <a href="/" style="font-size: 0.85rem; color: #64748b; text-decoration: none;">← Kembali ke Beranda</a>
+    </div>
+  </div>
+
+  <script>
+    const loginForm = document.getElementById('loginForm');
+    const errorBox = document.getElementById('errorBox');
+    const submitBtn = document.getElementById('submitBtn');
+
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorBox.style.display = 'none';
+      submitBtn.disabled = true;
+      submitBtn.innerText = 'Memverifikasi...';
+
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+
+      try {
+        const res = await fetch('/api/admin/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          window.location.href = '/admin';
+        } else {
+          errorBox.innerText = data.error || 'Login gagal, periksa ID & Sandi.';
+          errorBox.style.display = 'block';
+          submitBtn.disabled = false;
+          submitBtn.innerText = 'Masuk Dashboard';
+        }
+      } catch (err) {
+        errorBox.innerText = 'Terjadi gangguan koneksi ke server.';
+        errorBox.style.display = 'block';
+        submitBtn.disabled = false;
+        submitBtn.innerText = 'Masuk Dashboard';
+      }
+    });
+  </script>
+</body>
+</html>

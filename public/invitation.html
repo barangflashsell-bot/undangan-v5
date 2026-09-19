@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Undangan Pernikahan</title>
+  <link rel="stylesheet" href="/css/common.css">
+  <link rel="stylesheet" href="/css/themes.css">
+  <style>
+    /* Cover Lock Screen (RULE 10) */
+    .cover-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: var(--t-cover-gradient);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 60px 24px 40px;
+      color: #ffffff;
+      text-align: center;
+      transition: transform 0.8s cubic-bezier(0.77, 0, 0.175, 1), opacity 0.8s ease;
+    }
+
+    .cover-overlay.opened {
+      transform: translateY(-100%);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .cover-badge {
+      font-size: 0.8rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      opacity: 0.9;
+      font-weight: 600;
+    }
+
+    .cover-names {
+      font-family: var(--t-font-title);
+      font-size: 2.2rem;
+      font-weight: 700;
+      margin: 14px 0 8px;
+      line-height: 1.2;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    }
+
+    .cover-guest-box {
+      background: rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      border-radius: 20px;
+      padding: 24px 20px;
+      width: 100%;
+      max-width: 340px;
+      margin: 20px 0;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+
+    .cover-guest-label {
+      font-size: 0.85rem;
+      opacity: 0.9;
+      font-weight: 400;
+    }
+
+    .cover-guest-name {
+      font-size: 1.35rem;
+      font-weight: 800;
+      margin: 8px 0 4px;
+      color: #ffffff;
+      letter-spacing: 0.3px;
+    }
+
+    .btn-open-invitation {
+      background: var(--t-btn-bg);
+      color: var(--t-btn-text);
+      border: 1px solid rgba(255,255,255,0.4);
+      padding: 14px 32px;
+      border-radius: 9999px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+      animation: bounce 2s infinite;
+      transition: all 0.2s ease;
+    }
+
+    @keyframes bounce {
+      0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+      40% { transform: translateY(-8px); }
+      60% { transform: translateY(-4px); }
+    }
+
+    /* Floating Music Button */
+    .music-btn {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 800;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: var(--t-primary);
+      color: #ffffff;
+      border: 2px solid #ffffff;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1.25rem;
+      transition: all 0.2s ease;
+    }
+
+    .music-btn.playing {
+      animation: spin 6s linear infinite;
+    }
+
+    @keyframes spin {
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Countdown Timer */
+    .countdown-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      max-width: 360px;
+      margin: 20px auto 0;
+    }
+    .countdown-box {
+      background: var(--t-card-bg);
+      border: 1px solid var(--t-card-border);
+      border-radius: 12px;
+      padding: 12px 6px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    .countdown-num {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--t-primary);
+      font-family: var(--t-font-title);
+    }
+    .countdown-lbl {
+      font-size: 0.7rem;
+      color: var(--t-text-muted);
+      text-transform: uppercase;
+      font-weight: 600;
+      margin-top: 2px;
+    }
+
+    /* Couple Profiles */
+    .couple-avatar {
+      width: 130px;
+      height: 130px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin: 0 auto 16px;
+      border: 4px solid var(--t-accent-gold);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+      display: block;
+    }
+
+    /* Story Timeline */
+    .story-item {
+      text-align: left;
+      border-left: 2px solid var(--t-accent-gold);
+      padding-left: 16px;
+      margin-left: 20px;
+      margin-bottom: 20px;
+      position: relative;
+    }
+    .story-item::before {
+      content: '';
+      position: absolute;
+      left: -7px;
+      top: 4px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--t-accent);
+    }
+
+    /* Gallery Grid */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 16px;
+    }
+    .gallery-img {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .gallery-img:hover {
+      transform: scale(1.02);
+    }
+
+    /* Lightbox Modal */
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.9);
+      z-index: 2000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .lightbox.active { display: flex; }
+    .lightbox img {
+      max-width: 90vw;
+      max-height: 85vh;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body data-theme="islami-emerald">
+
+  <!-- COVER / LOCK SCREEN (RULE 10: TAMU LANGSUNG KE UNDANGAN) -->
+  <div class="cover-overlay" id="coverOverlay">
+    <div style="margin-top: 20px;">
+      <div class="cover-badge">WALIMATUL 'URS</div>
+      <h1 class="cover-names" id="coverTitle">Andi & Sinta</h1>
+      <p id="coverEventDate" style="font-size: 0.95rem; opacity: 0.9;">Minggu, 25 Oktober 2026</p>
+    </div>
+
+    <!-- Personalized Guest Badge (RULE 6) -->
+    <div class="cover-guest-box">
+      <div class="cover-guest-label">Kepada Yth. Bapak/Ibu/Saudara/i:</div>
+      <div class="cover-guest-name" id="coverGuestName">Tamu Undangan</div>
+      <div style="font-size: 0.8rem; opacity: 0.8;" id="coverGuestCategory">Tamu Terhormat</div>
+    </div>
+
+    <div>
+      <button type="button" class="btn-open-invitation" id="btnOpenInvitation">
+        <span>✉️</span> BUKA UNDANGAN
+      </button>
+      <div style="font-size: 0.75rem; opacity: 0.7; margin-top: 12px;">*Sentuh untuk membuka undangan</div>
+    </div>
+  </div>
+
+  <!-- FLOATING MUSIC PLAYER -->
+  <button type="button" class="music-btn" id="musicToggleBtn" title="Putar/Hentikan Musik">
+    🎵
+  </button>
+  <audio id="bgAudio" loop preload="auto"></audio>
+
+  <!-- MAIN INVITATION CONTENT WRAPPER -->
+  <div class="theme-container" id="invitationContent">
+
+    <!-- HERO SECTION -->
+    <section class="t-section">
+      <div style="font-size: 0.85rem; letter-spacing: 2px; text-transform: uppercase; color: var(--t-accent); font-weight: 700;">
+        The Wedding Of
+      </div>
+      <h1 class="t-title" id="heroTitle" style="font-size: 2.2rem; margin: 10px 0 6px;">Andi & Sinta</h1>
+      <div class="t-ornament"></div>
+      <p style="color: var(--t-text-muted); font-size: 0.95rem;" id="heroDate">25 Oktober 2026</p>
+
+      <!-- COUNTDOWN -->
+      <div class="countdown-grid" id="countdownGrid">
+        <div class="countdown-box">
+          <div class="countdown-num" id="cdDays">00</div>
+          <div class="countdown-lbl">Hari</div>
+        </div>
+        <div class="countdown-box">
+          <div class="countdown-num" id="cdHours">00</div>
+          <div class="countdown-lbl">Jam</div>
+        </div>
+        <div class="countdown-box">
+          <div class="countdown-num" id="cdMinutes">00</div>
+          <div class="countdown-lbl">Menit</div>
+        </div>
+        <div class="countdown-box">
+          <div class="countdown-num" id="cdSeconds">00</div>
+          <div class="countdown-lbl">Detik</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- QUOTE SECTION -->
+    <section class="t-section t-section-alt">
+      <div style="max-width: 400px; margin: 0 auto;">
+        <div style="font-size: 2.5rem; line-height: 1; color: var(--t-accent-gold); margin-bottom: 8px;">“</div>
+        <p id="quoteTextEl" style="font-style: italic; font-size: 0.95rem; line-height: 1.6; color: var(--t-text); margin-bottom: 12px;">
+          Dan di antara tanda-tanda kebesaran-Nya ialah Dia menciptakan pasangan-pasangan untukmu...
+        </p>
+        <div id="quoteSourceEl" style="font-weight: 700; font-size: 0.85rem; color: var(--t-primary);">QS. Ar-Rum: 21</div>
+      </div>
+    </section>
+
+    <!-- COUPLE SECTION -->
+    <section class="t-section">
+      <h2 class="t-title" style="font-size: 1.6rem;">Mempelai</h2>
+      <div class="t-subtitle">Bahagia</div>
+      <div class="t-ornament"></div>
+
+      <!-- Groom -->
+      <div class="t-card" style="margin-top: 20px;">
+        <img id="groomPhotoEl" class="couple-avatar" src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400" alt="Groom">
+        <h3 id="groomNameEl" class="t-title" style="font-size: 1.3rem;">Muhammad Andi Pratama</h3>
+        <p id="groomParentsEl" style="font-size: 0.85rem; color: var(--t-text-muted); margin-top: 6px; line-height: 1.4;">
+          Putra pertama dari Bpk. Bambang & Ibu Siti
+        </p>
+      </div>
+
+      <div style="font-size: 2rem; color: var(--t-accent); font-family: var(--t-font-script); margin: 10px 0;">&</div>
+
+      <!-- Bride -->
+      <div class="t-card">
+        <img id="bridePhotoEl" class="couple-avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400" alt="Bride">
+        <h3 id="brideNameEl" class="t-title" style="font-size: 1.3rem;">Siti Nur Aisyah</h3>
+        <p id="brideParentsEl" style="font-size: 0.85rem; color: var(--t-text-muted); margin-top: 6px; line-height: 1.4;">
+          Putri kedua dari Bpk. H. Rahmat & Ibu Hj. Rohana
+        </p>
+      </div>
+    </section>
+
+    <!-- EVENTS SECTION (AKAD & RESEPSI) -->
+    <section class="t-section t-section-alt">
+      <h2 class="t-title" style="font-size: 1.6rem;">Rangkaian Acara</h2>
+      <div class="t-subtitle">Waktu & Tempat</div>
+      <div class="t-ornament"></div>
+
+      <!-- Akad Nikah -->
+      <div class="t-card">
+        <div style="font-size: 1.8rem; margin-bottom: 6px;">💍</div>
+        <h3 class="t-title" style="font-size: 1.25rem;">Akad Nikah</h3>
+        <p id="akadDateEl" style="font-weight: 700; color: var(--t-accent); margin: 8px 0 4px; font-size: 1rem;">
+          Minggu, 25 Oktober 2026
+        </p>
+        <p id="akadTimeEl" style="font-size: 0.9rem; color: var(--t-text-muted); font-weight: 600;">
+          08.00 - 10.00 WIB
+        </p>
+        <hr style="border: 0; border-top: 1px dashed var(--t-card-border); margin: 14px 0;">
+        <h4 id="akadLocationEl" style="font-size: 1rem; font-weight: 700; color: var(--t-text);">
+          Masjid Agung Al-Falah
+        </h4>
+        <p id="akadAddressEl" style="font-size: 0.85rem; color: var(--t-text-muted); margin: 6px 0 16px; line-height: 1.4;">
+          Jl. Pahlawan No. 45, Surabaya
+        </p>
+        <a id="akadMapBtn" href="#" target="_blank" class="t-btn" style="font-size: 0.85rem; padding: 10px 20px;">
+          📍 Buka Google Maps
+        </a>
+      </div>
+
+      <!-- Resepsi -->
+      <div class="t-card" style="margin-top: 24px;">
+        <div style="font-size: 1.8rem; margin-bottom: 6px;">🎉</div>
+        <h3 class="t-title" style="font-size: 1.25rem;">Resepsi Pernikahan</h3>
+        <p id="resepsiDateEl" style="font-weight: 700; color: var(--t-accent); margin: 8px 0 4px; font-size: 1rem;">
+          Minggu, 25 Oktober 2026
+        </p>
+        <p id="resepsiTimeEl" style="font-size: 0.9rem; color: var(--t-text-muted); font-weight: 600;">
+          11.00 - 14.00 WIB
+        </p>
+        <hr style="border: 0; border-top: 1px dashed var(--t-card-border); margin: 14px 0;">
+        <h4 id="resepsiLocationEl" style="font-size: 1rem; font-weight: 700; color: var(--t-text);">
+          Grand Ballroom Hotel Majapahit
+        </h4>
+        <p id="resepsiAddressEl" style="font-size: 0.85rem; color: var(--t-text-muted); margin: 6px 0 16px; line-height: 1.4;">
+          Jl. Tunjungan No. 65, Surabaya
+        </p>
+        <a id="resepsiMapBtn" href="#" target="_blank" class="t-btn" style="font-size: 0.85rem; padding: 10px 20px;">
+          📍 Buka Google Maps
+        </a>
+      </div>
+    </section>
+
+    <!-- LOVE STORY SECTION -->
+    <section class="t-section" id="storySection">
+      <h2 class="t-title" style="font-size: 1.6rem;">Kisah Cinta</h2>
+      <div class="t-subtitle">Perjalanan Kami</div>
+      <div class="t-ornament"></div>
+      <div id="storyTimeline" style="margin-top: 20px;"></div>
+    </section>
+
+    <!-- GALLERY SECTION -->
+    <section class="t-section t-section-alt" id="gallerySection">
+      <h2 class="t-title" style="font-size: 1.6rem;">Galeri Foto</h2>
+      <div class="t-subtitle">Momen Bahagia</div>
+      <div class="t-ornament"></div>
+      <div class="gallery-grid" id="galleryGrid"></div>
+    </section>
+
+    <!-- DIGITAL GIFT / AMPLOP DIGITAL -->
+    <section class="t-section" id="giftSection">
+      <h2 class="t-title" style="font-size: 1.6rem;">Tanda Kasih</h2>
+      <div class="t-subtitle">Amplop Digital</div>
+      <div class="t-ornament"></div>
+      <p style="font-size: 0.85rem; color: var(--t-text-muted); max-width: 360px; margin: 0 auto 20px;">
+        Doa restu Anda adalah karunia terindah bagi kami. Namun jika Anda berkenan memberikan tanda kasih, dapat melalui rekening berikut:
+      </p>
+      <div id="giftAccounts"></div>
+    </section>
+
+    <!-- RSVP SECTION -->
+    <section class="t-section t-section-alt" id="rsvpSection">
+      <h2 class="t-title" style="font-size: 1.6rem;">Konfirmasi Kehadiran</h2>
+      <div class="t-subtitle">RSVP</div>
+      <div class="t-ornament"></div>
+
+      <div class="t-card" style="text-align: left;">
+        <form id="rsvpForm">
+          <div class="form-group">
+            <label class="form-label">Nama Tamu</label>
+            <input type="text" id="rsvpName" class="form-input" readonly>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Konfirmasi Kehadiran</label>
+            <select id="rsvpStatus" class="form-select">
+              <option value="hadir">Hadir</option>
+              <option value="tidak_hadir">Tidak Dapat Hadir</option>
+              <option value="ragu">Masih Ragu</option>
+            </select>
+          </div>
+          <div class="form-group" id="rsvpPaxGroup">
+            <label class="form-label">Jumlah Orang</label>
+            <select id="rsvpPax" class="form-select">
+              <option value="1">1 Orang</option>
+              <option value="2">2 Orang</option>
+              <option value="3">3 Orang</option>
+              <option value="4">4 Orang</option>
+            </select>
+          </div>
+          <button type="submit" id="btnSubmitRsvp" class="t-btn" style="width: 100%; justify-content: center; margin-top: 10px;">
+            Kirim Konfirmasi Kehadiran
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <!-- WISHES & PRAYERS SECTION -->
+    <section class="t-section">
+      <h2 class="t-title" style="font-size: 1.6rem;">Ucapan & Doa</h2>
+      <div class="t-subtitle">Doa Restu</div>
+      <div class="t-ornament"></div>
+
+      <!-- Wish Form -->
+      <div class="t-card" style="text-align: left;">
+        <form id="wishForm">
+          <div class="form-group">
+            <label class="form-label">Nama Pengirim</label>
+            <input type="text" id="wishSenderName" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Ucapan & Doa Restu</label>
+            <textarea id="wishMessage" class="form-textarea" rows="3" placeholder="Tuliskan ucapan dan doa terbaik Anda untuk kedua mempelai..." required></textarea>
+          </div>
+          <button type="submit" id="btnSubmitWish" class="t-btn" style="width: 100%; justify-content: center;">
+            ✉️ Kirim Doa & Ucapan
+          </button>
+        </form>
+      </div>
+
+      <!-- Wishes Stream -->
+      <div id="wishesList" style="margin-top: 20px; text-align: left;"></div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer style="padding: 40px 20px 80px; text-align: center; color: var(--t-text-muted); font-size: 0.85rem;">
+      <p>Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Anda berkenan hadir.</p>
+      <div style="font-family: var(--t-font-title); font-size: 1.2rem; color: var(--t-primary); margin-top: 14px; font-weight: 700;" id="footerCouple">
+        Andi & Sinta
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- Lightbox Modal -->
+  <div class="lightbox" id="lightbox" onclick="closeLightbox()">
+    <img id="lightboxImg" src="" alt="Gallery Preview">
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script>
+    // Extract slug and guestToken from URL pathname: /u/:slug/:guestToken?
+    const pathParts = window.location.pathname.split('/').filter(Boolean);
+    // pathParts[0] = 'u', pathParts[1] = slug, pathParts[2] = guestToken (optional)
+    const slug = pathParts[1] || 'wedding-andi-sinta';
+    const guestToken = pathParts[2] || '';
+
+    let invData = null;
+    let guestData = null;
+    let audioPlayed = false;
+
+    function showToast(msg, type = 'success') {
+      const c = document.getElementById('toastContainer');
+      const t = document.createElement('div');
+      t.className = `toast toast-${type} show`;
+      t.innerText = msg;
+      c.appendChild(t);
+      setTimeout(() => {
+        t.classList.remove('show');
+        setTimeout(() => t.remove(), 300);
+      }, 3000);
+    }
+
+    async function copyText(text, msg = 'Nomor rekening berhasil disalin!') {
+      try {
+        await navigator.clipboard.writeText(text);
+        showToast(msg);
+      } catch (e) {
+        const input = document.createElement('input');
+        input.value = text;
+        document.body.appendChild(input);
+        input.select();
+        document.execCommand('copy');
+        document.body.removeChild(input);
+        showToast(msg);
+      }
+    }
+
+    // Load data from Guest API
+    async function loadInvitation() {
+      try {
+        const url = `/api/u/${slug}${guestToken ? '/' + guestToken : ''}`;
+        const res = await fetch(url);
+        const data = await res.json();
+
+        if (!data.success) {
+          showToast(data.error || 'Gagal memuat undangan', 'danger');
+          return;
+        }
+
+        invData = data.invitation;
+        guestData = data.guest;
+
+        // Apply theme dynamically to body
+        document.body.setAttribute('data-theme', invData.theme_id || 'islami-emerald');
+
+        // Document Title
+        document.title = invData.title || 'Undangan Pernikahan';
+
+        // Cover setup (RULE 6 & 10)
+        document.getElementById('coverTitle').innerText = `${invData.groom_nickname || 'Pria'} & ${invData.bride_nickname || 'Wanita'}`;
+        document.getElementById('coverEventDate').innerText = invData.akad_date || invData.event_date || '';
+        document.getElementById('coverGuestName').innerText = guestData.name || 'Tamu Undangan';
+        document.getElementById('coverGuestCategory').innerText = guestData.category || 'Tamu Terhormat';
+
+        // Hero setup
+        document.getElementById('heroTitle').innerText = `${invData.groom_nickname || 'Pria'} & ${invData.bride_nickname || 'Wanita'}`;
+        document.getElementById('heroDate').innerText = invData.akad_date || '';
+        document.getElementById('footerCouple').innerText = `${invData.groom_nickname || 'Pria'} & ${invData.bride_nickname || 'Wanita'}`;
+
+        // Audio music source
+        if (invData.music_url) {
+          document.getElementById('bgAudio').src = invData.music_url;
+        }
+
+        // Quotes
+        document.getElementById('quoteTextEl').innerText = invData.quote_text || '';
+        document.getElementById('quoteSourceEl').innerText = invData.quote_source || '';
+
+        // Groom & Bride profiles
+        document.getElementById('groomNameEl').innerText = invData.groom_name || '';
+        document.getElementById('groomParentsEl').innerText = invData.groom_parents || '';
+        if (invData.groom_photo) document.getElementById('groomPhotoEl').src = invData.groom_photo;
+
+        document.getElementById('brideNameEl').innerText = invData.bride_name || '';
+        document.getElementById('brideParentsEl').innerText = invData.bride_parents || '';
+        if (invData.bride_photo) document.getElementById('bridePhotoEl').src = invData.bride_photo;
+
+        // Events
+        document.getElementById('akadDateEl').innerText = invData.akad_date || '';
+        document.getElementById('akadTimeEl').innerText = invData.akad_time || '';
+        document.getElementById('akadLocationEl').innerText = invData.akad_location || '';
+        document.getElementById('akadAddressEl').innerText = invData.akad_address || '';
+        document.getElementById('akadMapBtn').href = invData.akad_map_url || '#';
+
+        document.getElementById('resepsiDateEl').innerText = invData.resepsi_date || '';
+        document.getElementById('resepsiTimeEl').innerText = invData.resepsi_time || '';
+        document.getElementById('resepsiLocationEl').innerText = invData.resepsi_location || '';
+        document.getElementById('resepsiAddressEl').innerText = invData.resepsi_address || '';
+        document.getElementById('resepsiMapBtn').href = invData.resepsi_map_url || '#';
+
+        // Countdown Timer
+        initCountdown(invData.event_date);
+
+        // Love story
+        renderLoveStory(invData.love_story);
+
+        // Gallery
+        renderGallery(invData.gallery_photos);
+
+        // Bank Accounts / Gifts
+        renderGifts(invData.bank_accounts);
+
+        // RSVP initialization
+        document.getElementById('rsvpName').value = guestData.name;
+        if (guestData.attendance_status) {
+          document.getElementById('rsvpStatus').value = guestData.attendance_status;
+        }
+        if (guestData.total_pax) {
+          document.getElementById('rsvpPax').value = guestData.total_pax;
+        }
+
+        // Wish Sender Name
+        document.getElementById('wishSenderName').value = guestData.name !== 'Tamu Undangan' ? guestData.name : '';
+
+        // Wishes stream
+        renderWishes(data.wishes || []);
+
+      } catch (err) {
+        showToast('Koneksi terputus saat memuat undangan', 'danger');
+      }
+    }
+
+    // Countdown Timer Logic
+    function initCountdown(targetDateStr) {
+      if (!targetDateStr) return;
+      const targetDate = new Date(targetDateStr + 'T08:00:00').getTime();
+
+      function update() {
+        const now = new Date().getTime();
+        const diff = targetDate - now;
+
+        if (diff <= 0) {
+          document.getElementById('cdDays').innerText = '00';
+          document.getElementById('cdHours').innerText = '00';
+          document.getElementById('cdMinutes').innerText = '00';
+          document.getElementById('cdSeconds').innerText = '00';
+          return;
+        }
+
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+        document.getElementById('cdDays').innerText = String(days).padStart(2, '0');
+        document.getElementById('cdHours').innerText = String(hours).padStart(2, '0');
+        document.getElementById('cdMinutes').innerText = String(minutes).padStart(2, '0');
+        document.getElementById('cdSeconds').innerText = String(seconds).padStart(2, '0');
+      }
+
+      update();
+      setInterval(update, 1000);
+    }
+
+    // Render Love Story
+    function renderLoveStory(stories) {
+      const el = document.getElementById('storyTimeline');
+      if (!stories || stories.length === 0) {
+        document.getElementById('storySection').style.display = 'none';
+        return;
+      }
+      el.innerHTML = stories.map(s => `
+        <div class="story-item">
+          <span style="font-weight: 800; font-size: 0.85rem; color: var(--t-accent);">${s.year}</span>
+          <h4 style="font-size: 1.05rem; font-weight: 700; color: var(--t-primary); margin: 2px 0 4px;">${s.title}</h4>
+          <p style="font-size: 0.85rem; color: var(--t-text-muted); line-height: 1.4;">${s.desc}</p>
+        </div>
+      `).join('');
+    }
+
+    // Render Gallery
+    function renderGallery(photos) {
+      const el = document.getElementById('galleryGrid');
+      if (!photos || photos.length === 0) {
+        document.getElementById('gallerySection').style.display = 'none';
+        return;
+      }
+      el.innerHTML = photos.map(url => `
+        <img class="gallery-img" src="${url}" alt="Foto Galeri" onclick="openLightbox('${url}')">
+      `).join('');
+    }
+
+    function openLightbox(url) {
+      document.getElementById('lightboxImg').src = url;
+      document.getElementById('lightbox').classList.add('active');
+    }
+
+    function closeLightbox() {
+      document.getElementById('lightbox').classList.remove('active');
+    }
+
+    // Render Gifts / Bank Accounts
+    function renderGifts(accounts) {
+      const el = document.getElementById('giftAccounts');
+      if (!accounts || accounts.length === 0) {
+        document.getElementById('giftSection').style.display = 'none';
+        return;
+      }
+      el.innerHTML = accounts.map(acc => `
+        <div class="t-card" style="margin-bottom: 14px;">
+          <strong style="font-size: 1.05rem; color: var(--t-primary);">${acc.bank_name}</strong>
+          <div style="font-family: monospace; font-size: 1.25rem; font-weight: 800; color: var(--t-text); margin: 8px 0;">
+            ${acc.account_number}
+          </div>
+          <div style="font-size: 0.85rem; color: var(--t-text-muted); margin-bottom: 12px;">
+            a.n. ${acc.account_holder}
+          </div>
+          <button type="button" onclick="copyText('${acc.account_number}', 'Nomor rekening ${acc.bank_name} disalin!')" class="t-btn" style="font-size: 0.85rem; padding: 8px 20px;">
+            📋 Salin Nomor Rekening
+          </button>
+        </div>
+      `).join('');
+    }
+
+    // Render Wishes
+    function renderWishes(wishes) {
+      const el = document.getElementById('wishesList');
+      if (!wishes || wishes.length === 0) {
+        el.innerHTML = '<p style="text-align: center; color: var(--t-text-muted); font-size: 0.85rem;">Jadilah yang pertama memberikan ucapan dan doa!</p>';
+        return;
+      }
+      el.innerHTML = wishes.map(w => `
+        <div class="t-card" style="margin-bottom: 12px; padding: 16px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <strong style="font-size: 0.95rem; color: var(--t-primary);">${w.sender_name}</strong>
+            <span class="badge ${w.attendance === 'hadir' ? 'badge-success' : 'badge-info'}" style="font-size: 0.7rem;">${w.attendance}</span>
+          </div>
+          <p style="font-size: 0.9rem; color: var(--t-text); line-height: 1.4;">${w.message}</p>
+        </div>
+      `).join('');
+    }
+
+    // Open Invitation Handler (RULE 10)
+    const cover = document.getElementById('coverOverlay');
+    const openBtn = document.getElementById('btnOpenInvitation');
+    const audio = document.getElementById('bgAudio');
+    const musicBtn = document.getElementById('musicToggleBtn');
+
+    openBtn.addEventListener('click', () => {
+      cover.classList.add('opened');
+      // Play background music
+      if (audio.src) {
+        audio.play().then(() => {
+          audioPlayed = true;
+          musicBtn.classList.add('playing');
+        }).catch(() => {
+          // Autoplay blocked by browser policy
+        });
+      }
+    });
+
+    musicBtn.addEventListener('click', () => {
+      if (audio.paused) {
+        audio.play();
+        musicBtn.classList.add('playing');
+        showToast('Musik diputar');
+      } else {
+        audio.pause();
+        musicBtn.classList.remove('playing');
+        showToast('Musik dijeda');
+      }
+    });
+
+    // RSVP Submit Handler
+    document.getElementById('rsvpForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const status = document.getElementById('rsvpStatus').value;
+      const pax = document.getElementById('rsvpPax').value;
+      const btn = document.getElementById('btnSubmitRsvp');
+
+      btn.disabled = true;
+      btn.innerText = 'Mengirim...';
+
+      try {
+        const url = `/api/u/${slug}${guestToken ? '/' + guestToken : ''}/rsvp`;
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ attendance_status: status, total_pax: pax })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast(data.message);
+        } else {
+          showToast(data.error || 'Gagal menyimpan konfirmasi', 'danger');
+        }
+      } catch (err) {
+        showToast('Koneksi terputus', 'danger');
+      } finally {
+        btn.disabled = false;
+        btn.innerText = 'Kirim Konfirmasi Kehadiran';
+      }
+    });
+
+    // Wish Submit Handler
+    document.getElementById('wishForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const sender_name = document.getElementById('wishSenderName').value.trim();
+      const message = document.getElementById('wishMessage').value.trim();
+      const attendance = document.getElementById('rsvpStatus').value;
+      const btn = document.getElementById('btnSubmitWish');
+
+      if (!message) return;
+
+      btn.disabled = true;
+      btn.innerText = 'Mengirim doa...';
+
+      try {
+        const url = `/api/u/${slug}${guestToken ? '/' + guestToken : ''}/wishes`;
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sender_name, message, attendance })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast(data.message);
+          document.getElementById('wishMessage').value = '';
+          // Refresh wishes list
+          const wRes = await fetch(`/api/u/${slug}${guestToken ? '/' + guestToken : ''}/wishes`);
+          const wData = await wRes.json();
+          if (wData.success) {
+            renderWishes(wData.wishes);
+          }
+        } else {
+          showToast(data.error || 'Gagal mengirim ucapan', 'danger');
+        }
+      } catch (err) {
+        showToast('Koneksi terputus', 'danger');
+      } finally {
+        btn.disabled = false;
+        btn.innerText = '✉️ Kirim Doa & Ucapan';
+      }
+    });
+
+    // Start
+    loadInvitation();
+  </script>
+</body>
+</html>

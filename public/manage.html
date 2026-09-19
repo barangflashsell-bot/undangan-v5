@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Pengelolaan Undangan - Editor Penyewa</title>
+  <link rel="stylesheet" href="/css/common.css">
+  <style>
+    body {
+      background-color: #f1f5f9;
+      padding-bottom: 90px;
+    }
+
+    /* Sticky Header - RULE 9: SHARE HARUS SELALU TERLIHAT */
+    .manage-header {
+      position: sticky;
+      top: 0;
+      z-index: 500;
+      background: #ffffff;
+      border-bottom: 1px solid #e2e8f0;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .title-editor-wrap {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .inv-title-input {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #0f172a;
+      border: 1px solid transparent;
+      border-radius: 6px;
+      padding: 4px 8px;
+      width: 100%;
+      background: transparent;
+      outline: none;
+      transition: var(--transition);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .inv-title-input:hover {
+      border-color: #cbd5e1;
+      background: #f8fafc;
+    }
+    .inv-title-input:focus {
+      border-color: var(--primary);
+      background: #ffffff;
+      box-shadow: 0 0 0 2px var(--primary-ring);
+    }
+
+    .save-status {
+      font-size: 0.72rem;
+      color: #64748b;
+      margin-left: 8px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .save-status.saving { color: #d97706; }
+    .save-status.saved { color: #059669; }
+
+    /* Nav Tabs (Mobile First Horizontal Scrollable) */
+    .tabs-nav-container {
+      background: #ffffff;
+      border-bottom: 1px solid #e2e8f0;
+      position: sticky;
+      top: 61px;
+      z-index: 400;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+    }
+    .tabs-nav-container::-webkit-scrollbar { display: none; }
+
+    .tabs-nav {
+      display: flex;
+      padding: 0 12px;
+      gap: 6px;
+      white-space: nowrap;
+      min-width: max-content;
+    }
+
+    .tab-btn {
+      padding: 12px 14px;
+      background: none;
+      border: none;
+      border-bottom: 3px solid transparent;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: #64748b;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: var(--transition);
+    }
+    .tab-btn.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+
+    .content-area {
+      max-width: 800px;
+      margin: 16px auto;
+      padding: 0 16px;
+    }
+
+    .tab-panel {
+      display: none;
+      animation: fadeIn 0.2s ease-in-out;
+    }
+    .tab-panel.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Theme Card Grid */
+    .theme-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 14px;
+      margin-top: 14px;
+    }
+
+    .theme-card {
+      background: #ffffff;
+      border: 2px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 14px;
+      cursor: pointer;
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+      text-align: center;
+    }
+    .theme-card:hover {
+      border-color: #cbd5e1;
+      transform: translateY(-2px);
+    }
+    .theme-card.selected {
+      border-color: var(--primary);
+      background: #f0fdf4;
+      box-shadow: 0 0 0 3px var(--primary-ring);
+    }
+    .theme-card .color-strip {
+      height: 38px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 0.8rem;
+    }
+
+    /* Guest Table & List */
+    .guest-item {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .guest-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .guest-name {
+      font-weight: 700;
+      color: #0f172a;
+      font-size: 0.95rem;
+    }
+    .guest-token {
+      font-family: monospace;
+      background: #f1f5f9;
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      color: #475569;
+    }
+    .guest-actions {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    /* Floating Preview Button */
+    .floating-preview {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 900;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sticky Top Header with ALWAYS VISIBLE SHARE BUTTON (RULE 9) -->
+  <header class="manage-header">
+    <div class="title-editor-wrap">
+      <input type="text" id="invTitleInput" class="inv-title-input" title="Klik untuk mengubah judul undangan" placeholder="Judul Undangan...">
+      <div id="saveStatus" class="save-status saved">
+        <span>✓ Tersimpan</span>
+      </div>
+    </div>
+    
+    <!-- Prominent Share Button -->
+    <button id="openShareModalBtn" class="btn btn-share-highlight" title="Bagikan Undangan Ini">
+      🔗 BAGIKAN
+    </button>
+  </header>
+
+  <!-- Navigation Tabs (Mobile-First) -->
+  <div class="tabs-nav-container">
+    <div class="tabs-nav">
+      <button class="tab-btn active" data-target="panel-tema">🎨 Tema</button>
+      <button class="tab-btn" data-target="panel-mempelai">👫 Mempelai</button>
+      <button class="tab-btn" data-target="panel-acara">📅 Acara & Lokasi</button>
+      <button class="tab-btn" data-target="panel-cerita">📖 Cerita & Galeri</button>
+      <button class="tab-btn" data-target="panel-amplop">🎁 Amplop Digital</button>
+      <button class="tab-btn" data-target="panel-tamu">👥 Tamu & Link</button>
+      <button class="tab-btn" data-target="panel-ucapan">💬 Ucapan</button>
+    </div>
+  </div>
+
+  <main class="content-area">
+
+    <!-- TAB 1: TEMA VISUAL (RULE 12: DATA TIDAK BOLEH HILANG SAAT GANTI TEMA) -->
+    <div id="panel-tema" class="tab-panel active">
+      <div class="card">
+        <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 4px;">Pilih Tema Desain</h3>
+        <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 16px;">
+          Ganti tema kapan saja dengan aman. <strong>Seluruh teks, foto, daftar tamu, dan data acara tetap tersimpan utuh!</strong>
+        </p>
+
+        <div class="theme-grid">
+          <!-- Islami Emerald -->
+          <div class="theme-card" data-theme="islami-emerald" onclick="selectTheme('islami-emerald')">
+            <div class="color-strip" style="background: linear-gradient(135deg, #064e3b, #d97706);">
+              Zamrud & Emas
+            </div>
+            <strong style="display: block; font-size: 0.9rem;">Islami Emerald</strong>
+            <small style="color: #64748b; font-size: 0.75rem;">Nuansa Islami Mewah</small>
+          </div>
+
+          <!-- Rose Gold -->
+          <div class="theme-card" data-theme="rose-gold" onclick="selectTheme('rose-gold')">
+            <div class="color-strip" style="background: linear-gradient(135deg, #881337, #fb7185);">
+              Blush & Gold
+            </div>
+            <strong style="display: block; font-size: 0.9rem;">Rose Gold</strong>
+            <small style="color: #64748b; font-size: 0.75rem;">Romantis & Anggun</small>
+          </div>
+
+          <!-- Modern Minimalist -->
+          <div class="theme-card" data-theme="modern-minimalist" onclick="selectTheme('modern-minimalist')">
+            <div class="color-strip" style="background: linear-gradient(135deg, #0f172a, #64748b);">
+              Slate & Monochrome
+            </div>
+            <strong style="display: block; font-size: 0.9rem;">Modern Minimal</strong>
+            <small style="color: #64748b; font-size: 0.75rem;">Clean & Elegan</small>
+          </div>
+
+          <!-- Rustic Flora -->
+          <div class="theme-card" data-theme="rustic-flora" onclick="selectTheme('rustic-flora')">
+            <div class="color-strip" style="background: linear-gradient(135deg, #7c2d12, #c2410c);">
+              Terracotta & Earthy
+            </div>
+            <strong style="display: block; font-size: 0.9rem;">Rustic Flora</strong>
+            <small style="color: #64748b; font-size: 0.75rem;">Hangat & Natural</small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: DATA MEMPELAI -->
+    <div id="panel-mempelai" class="tab-panel">
+      <div class="card">
+        <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 16px;">Data Mempelai Pria & Wanita</h3>
+        
+        <!-- Pria -->
+        <div style="background: #f8fafc; padding: 14px; border-radius: 12px; margin-bottom: 16px; border: 1px solid #e2e8f0;">
+          <h4 style="font-size: 0.95rem; font-weight: 700; color: #0f172a; margin-bottom: 10px;">🤵 Mempelai Pria</h4>
+          <div class="form-group">
+            <label class="form-label">Nama Lengkap</label>
+            <input type="text" id="groomName" class="form-input auto-save-input">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Nama Panggilan</label>
+            <input type="text" id="groomNickname" class="form-input auto-save-input">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Keterangan Orang Tua</label>
+            <textarea id="groomParents" class="form-textarea auto-save-input" rows="2"></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">URL Foto Pria</label>
+            <input type="text" id="groomPhoto" class="form-input auto-save-input" placeholder="https://...">
+          </div>
+        </div>
+
+        <!-- Wanita -->
+        <div style="background: #f8fafc; padding: 14px; border-radius: 12px; border: 1px solid #e2e8f0;">
+          <h4 style="font-size: 0.95rem; font-weight: 700; color: #0f172a; margin-bottom: 10px;">👰 Mempelai Wanita</h4>
+          <div class="form-group">
+            <label class="form-label">Nama Lengkap</label>
+            <input type="text" id="brideName" class="form-input auto-save-input">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Nama Panggilan</label>
+            <input type="text" id="brideNickname" class="form-input auto-save-input">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Keterangan Orang Tua</label>
+            <textarea id="brideParents" class="form-textarea auto-save-input" rows="2"></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">URL Foto Wanita</label>
+            <input type="text" id="bridePhoto" class="form-input auto-save-input" placeholder="https://...">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: ACARA & LOKASI -->
+    <div id="panel-acara" class="tab-panel">
+      <div class="card">
+        <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 16px;">Jadwal Acara & Lokasi</h3>
+        
+        <div class="form-group">
+          <label class="form-label">Tanggal Hari H (Untuk Countdown Timer)</label>
+          <input type="date" id="eventDate" class="form-input auto-save-input">
+        </div>
+
+        <!-- Akad Nikah -->
+        <div style="background: #f8fafc; padding: 14px; border-radius: 12px; margin-bottom: 16px; border: 1px solid #e2e8f0;">
+          <h4 style="font-size: 0.95rem; font-weight: 700; color: #0f172a; margin-bottom: 10px;">💍 Akad Nikah</h4>
+          <div class="form-group">
+            <label class="form-label">Hari & Tanggal</label>
+            <input type="text" id="akadDate" class="form-input auto-save-input" placeholder="Minggu, 25 Oktober 2026">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Waktu Acara</label>
+            <input type="text" id="akadTime" class="form-input auto-save-input" placeholder="08.00 - 10.00 WIB">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Nama Tempat / Gedung</label>
+            <input type="text" id="akadLocation" class="form-input auto-save-input" placeholder="Masjid Agung Al-Falah">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Alamat Lengkap</label>
+            <textarea id="akadAddress" class="form-textarea auto-save-input" rows="2"></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Link Google Maps</label>
+            <input type="text" id="akadMapUrl" class="form-input auto-save-input" placeholder="https://maps.app.goo.gl/...">
+          </div>
+        </div>
+
+        <!-- Resepsi -->
+        <div style="background: #f8fafc; padding: 14px; border-radius: 12px; border: 1px solid #e2e8f0;">
+          <h4 style="font-size: 0.95rem; font-weight: 700; color: #0f172a; margin-bottom: 10px;">🎉 Resepsi Pernikahan</h4>
+          <div class="form-group">
+            <label class="form-label">Hari & Tanggal</label>
+            <input type="text" id="resepsiDate" class="form-input auto-save-input" placeholder="Minggu, 25 Oktober 2026">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Waktu Acara</label>
+            <input type="text" id="resepsiTime" class="form-input auto-save-input" placeholder="11.00 - 14.00 WIB">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Nama Tempat / Ballroom</label>
+            <input type="text" id="resepsiLocation" class="form-input auto-save-input" placeholder="Grand Ballroom Hotel Majapahit">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Alamat Lengkap</label>
+            <textarea id="resepsiAddress" class="form-textarea auto-save-input" rows="2"></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Link Google Maps</label>
+            <input type="text" id="resepsiMapUrl" class="form-input auto-save-input" placeholder="https://maps.app.goo.gl/...">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: CERITA, GALERI, & MUSIK -->
+    <div id="panel-cerita" class="tab-panel">
+      <div class="card">
+        <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 16px;">Kutipan, Galeri & Musik</h3>
+        
+        <div class="form-group">
+          <label class="form-label">Kutipan / Ayat Suci</label>
+          <textarea id="quoteText" class="form-textarea auto-save-input" rows="3"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Sumber Kutipan</label>
+          <input type="text" id="quoteSource" class="form-input auto-save-input" placeholder="QS. Ar-Rum: 21">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Link Audio Musik Latar (MP3)</label>
+          <input type="text" id="musicUrl" class="form-input auto-save-input" placeholder="https://.../music.mp3">
+          <small style="color: #64748b; font-size: 0.75rem;">Musik akan otomatis dimainkan saat tamu menekan Buka Undangan.</small>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Foto Galeri (Pisahkan URL dengan baris baru)</label>
+          <textarea id="galleryPhotosInput" class="form-textarea" rows="4" placeholder="https://images.unsplash.com/...&#10;https://images.unsplash.com/..."></textarea>
+          <button type="button" onclick="saveGalleryFromTextarea()" class="btn btn-secondary btn-sm" style="margin-top: 6px;">Simpan Daftar Galeri</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 5: AMPLOP & REKENING HADIAH -->
+    <div id="panel-amplop" class="tab-panel">
+      <div class="card">
+        <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 4px;">Amplop Digital & Kado</h3>
+        <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 16px;">
+          Tamu dapat menyalin nomor rekening untuk memberikan tanda kasih secara digital.
+        </p>
+
+        <div id="bankList"></div>
+
+        <div style="background: #f8fafc; padding: 14px; border-radius: 12px; border: 1px dashed #cbd5e1; margin-top: 14px;">
+          <h4 style="font-size: 0.9rem; font-weight: 700; margin-bottom: 8px;">+ Tambah Rekening Bank</h4>
+          <div class="form-group">
+            <input type="text" id="newBankName" class="form-input" placeholder="Nama Bank (misal: BCA, Mandiri, BSI)">
+          </div>
+          <div class="form-group">
+            <input type="text" id="newBankAccNumber" class="form-input" placeholder="Nomor Rekening">
+          </div>
+          <div class="form-group">
+            <input type="text" id="newBankAccHolder" class="form-input" placeholder="Atas Nama Pemilik Rekening">
+          </div>
+          <button type="button" onclick="addBankAccount()" class="btn btn-primary btn-sm">+ Simpan Rekening</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 6: DAFTAR TAMU & LINK KHUSUS (RULE 6) -->
+    <div id="panel-tamu" class="tab-panel">
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+          <div>
+            <h3 style="font-size: 1.15rem; font-weight: 700;">Daftar Tamu & Guest Token</h3>
+            <p style="font-size: 0.85rem; color: #64748b;">Setiap tamu mendapatkan Guest Token unik dan nama otomatis muncul di cover.</p>
+          </div>
+        </div>
+
+        <!-- Form Tambah Tamu -->
+        <form id="addGuestForm" style="background: #f8fafc; padding: 14px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 18px;">
+          <div class="form-group">
+            <label class="form-label">Nama Tamu / Keluarga</label>
+            <input type="text" id="guestNameInput" class="form-input" placeholder="Contoh: Bapak Dr. Bambang & Ibu" required>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div class="form-group">
+              <label class="form-label">Kategori Tamu</label>
+              <select id="guestCategoryInput" class="form-select">
+                <option value="Keluarga">Keluarga</option>
+                <option value="VIP">VIP</option>
+                <option value="Sahabat">Sahabat</option>
+                <option value="Rekan Kerja">Rekan Kerja</option>
+                <option value="Tamu Undangan">Tamu Undangan</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Nomor WhatsApp (Opsional)</label>
+              <input type="text" id="guestPhoneInput" class="form-input" placeholder="08123456789">
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary" style="width: 100%;">
+            + Tambah Tamu & Buat Guest Link
+          </button>
+        </form>
+
+        <!-- Daftar Tamu Container -->
+        <div id="guestsContainer">
+          <div style="text-align: center; padding: 20px; color: #64748b;">Memuat daftar tamu...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 7: UCAPAN & DOA -->
+    <div id="panel-ucapan" class="tab-panel">
+      <div class="card">
+        <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 12px;">Ucapan & Doa dari Tamu</h3>
+        <div id="wishesContainer">
+          <div style="text-align: center; padding: 20px; color: #64748b;">Memuat ucapan...</div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- FLOATING PREVIEW BUTTON -->
+  <a id="floatingPreviewBtn" href="#" target="_blank" class="btn btn-primary floating-preview">
+    👁️ Preview Undangan
+  </a>
+
+  <!-- MODAL SHARE (RULE 9) -->
+  <div class="modal-backdrop" id="shareModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 style="font-weight: 700; font-size: 1.15rem;">🔗 Bagikan Undangan</h3>
+        <button type="button" id="closeShareModalBtn" style="background: none; border: none; font-size: 1.4rem; cursor: pointer; color: #64748b;">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 0.875rem; color: #475569; margin-bottom: 16px;">
+          Bagikan link undangan kepada keluarga, sahabat, dan kerabat dengan pesan resmi yang rapi.
+        </p>
+
+        <!-- General Public Link -->
+        <div class="form-group">
+          <label class="form-label">Link Undangan Publik:</label>
+          <div style="display: flex; gap: 8px;">
+            <input type="text" id="sharePublicLink" class="form-input" readonly>
+            <button type="button" onclick="copyInput('sharePublicLink', 'Link publik disalin!')" class="btn btn-secondary btn-sm">Salin</button>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-top: 16px;">
+          <button type="button" id="shareWaBtn" class="btn btn-primary" style="flex: 1; background: #25d366; border-color: #25d366;">
+            💬 WhatsApp
+          </button>
+          <button type="button" id="webShareBtn" class="btn btn-secondary" style="flex: 1;">
+            📤 Bagikan
+          </button>
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;">
+
+        <div>
+          <label class="form-label">Ingin kirim dengan nama khusus per tamu?</label>
+          <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 8px;">
+            Buka tab <strong>👥 Tamu & Link</strong> untuk menyalin link dengan nama tamu yang langsung tertera di cover undangan.
+          </p>
+          <button type="button" onclick="switchToGuestTab()" class="btn btn-secondary btn-sm" style="width: 100%;">
+            Buka Daftar Tamu →
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script>
+    // Extract management token from URL pathname: /manage/{managementToken}
+    const pathParts = window.location.pathname.split('/');
+    const managementToken = pathParts[pathParts.length - 1];
+
+    let currentInvitation = null;
+    let guestList = [];
+    let saveTimeout = null;
+
+    function showToast(msg, type = 'success') {
+      const c = document.getElementById('toastContainer');
+      const t = document.createElement('div');
+      t.className = `toast toast-${type} show`;
+      t.innerText = msg;
+      c.appendChild(t);
+      setTimeout(() => {
+        t.classList.remove('show');
+        setTimeout(() => t.remove(), 300);
+      }, 3000);
+    }
+
+    async function copyToClipboard(text, message = 'Berhasil disalin!') {
+      try {
+        await navigator.clipboard.writeText(text);
+        showToast(message);
+      } catch (err) {
+        const input = document.createElement('input');
+        input.value = text;
+        document.body.appendChild(input);
+        input.select();
+        document.execCommand('copy');
+        document.body.removeChild(input);
+        showToast(message);
+      }
+    }
+
+    function copyInput(id, msg) {
+      const el = document.getElementById(id);
+      copyToClipboard(el.value, msg);
+    }
+
+    // Set saving badge status
+    function setSaveStatus(status) {
+      const el = document.getElementById('saveStatus');
+      if (status === 'saving') {
+        el.className = 'save-status saving';
+        el.innerHTML = '<span>💾 Menyimpan...</span>';
+      } else {
+        el.className = 'save-status saved';
+        el.innerHTML = '<span>✓ Tersimpan</span>';
+      }
+    }
+
+    // Tab Navigation
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+
+        btn.classList.add('active');
+        const targetId = btn.getAttribute('data-target');
+        document.getElementById(targetId).classList.add('active');
+      });
+    });
+
+    function switchToGuestTab() {
+      document.getElementById('shareModal').classList.remove('active');
+      const tamuBtn = document.querySelector('[data-target="panel-tamu"]');
+      if (tamuBtn) tamuBtn.click();
+    }
+
+    // Load initial data
+    async function loadData() {
+      try {
+        const res = await fetch(`/api/manage/${managementToken}`);
+        const data = await res.json();
+
+        if (!data.success) {
+          showToast(data.error || 'Gagal memuat data', 'danger');
+          return;
+        }
+
+        currentInvitation = data.invitation;
+        guestList = data.guests || [];
+
+        // Populate fields
+        document.getElementById('invTitleInput').value = currentInvitation.title;
+        document.getElementById('groomName').value = currentInvitation.groom_name || '';
+        document.getElementById('groomNickname').value = currentInvitation.groom_nickname || '';
+        document.getElementById('groomParents').value = currentInvitation.groom_parents || '';
+        document.getElementById('groomPhoto').value = currentInvitation.groom_photo || '';
+
+        document.getElementById('brideName').value = currentInvitation.bride_name || '';
+        document.getElementById('brideNickname').value = currentInvitation.bride_nickname || '';
+        document.getElementById('brideParents').value = currentInvitation.bride_parents || '';
+        document.getElementById('bridePhoto').value = currentInvitation.bride_photo || '';
+
+        document.getElementById('eventDate').value = currentInvitation.event_date || '';
+        document.getElementById('akadDate').value = currentInvitation.akad_date || '';
+        document.getElementById('akadTime').value = currentInvitation.akad_time || '';
+        document.getElementById('akadLocation').value = currentInvitation.akad_location || '';
+        document.getElementById('akadAddress').value = currentInvitation.akad_address || '';
+        document.getElementById('akadMapUrl').value = currentInvitation.akad_map_url || '';
+
+        document.getElementById('resepsiDate').value = currentInvitation.resepsi_date || '';
+        document.getElementById('resepsiTime').value = currentInvitation.resepsi_time || '';
+        document.getElementById('resepsiLocation').value = currentInvitation.resepsi_location || '';
+        document.getElementById('resepsiAddress').value = currentInvitation.resepsi_address || '';
+        document.getElementById('resepsiMapUrl').value = currentInvitation.resepsi_map_url || '';
+
+        document.getElementById('quoteText').value = currentInvitation.quote_text || '';
+        document.getElementById('quoteSource').value = currentInvitation.quote_source || '';
+        document.getElementById('musicUrl').value = currentInvitation.music_url || '';
+
+        if (Array.isArray(currentInvitation.gallery_photos)) {
+          document.getElementById('galleryPhotosInput').value = currentInvitation.gallery_photos.join('\n');
+        }
+
+        // Highlight selected theme
+        updateThemeSelectionUI(currentInvitation.theme_id);
+
+        // Render Bank List
+        renderBankAccounts(currentInvitation.bank_accounts || []);
+
+        // Render Guests
+        renderGuests();
+
+        // Render Wishes
+        renderWishes(data.wishes || []);
+
+        // Update preview link
+        const previewUrl = `/u/${currentInvitation.slug}/preview`;
+        document.getElementById('floatingPreviewBtn').href = previewUrl;
+        document.getElementById('sharePublicLink').value = window.location.origin + previewUrl;
+
+      } catch (err) {
+        showToast('Gagal terhubung ke server', 'danger');
+      }
+    }
+
+    // Inline Title Auto-Save (RULE 8: Nama Undangan Dapat Diubah)
+    document.getElementById('invTitleInput').addEventListener('input', (e) => {
+      triggerAutoSave({ title: e.target.value });
+    });
+
+    // Auto-save listener for form inputs
+    document.querySelectorAll('.auto-save-input').forEach(input => {
+      input.addEventListener('input', () => {
+        scheduleAutoSave();
+      });
+    });
+
+    function scheduleAutoSave() {
+      setSaveStatus('saving');
+      clearTimeout(saveTimeout);
+      saveTimeout = setTimeout(saveAllFields, 800);
+    }
+
+    async function triggerAutoSave(payload) {
+      setSaveStatus('saving');
+      try {
+        const res = await fetch(`/api/manage/${managementToken}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data.success) {
+          setSaveStatus('saved');
+        } else {
+          showToast(data.error || 'Gagal menyimpan', 'danger');
+        }
+      } catch (err) {
+        showToast('Koneksi terputus saat menyimpan', 'danger');
+      }
+    }
+
+    async function saveAllFields() {
+      const payload = {
+        title: document.getElementById('invTitleInput').value,
+        groom_name: document.getElementById('groomName').value,
+        groom_nickname: document.getElementById('groomNickname').value,
+        groom_parents: document.getElementById('groomParents').value,
+        groom_photo: document.getElementById('groomPhoto').value,
+        bride_name: document.getElementById('brideName').value,
+        bride_nickname: document.getElementById('brideNickname').value,
+        bride_parents: document.getElementById('brideParents').value,
+        bride_photo: document.getElementById('bridePhoto').value,
+        event_date: document.getElementById('eventDate').value,
+        akad_date: document.getElementById('akadDate').value,
+        akad_time: document.getElementById('akadTime').value,
+        akad_location: document.getElementById('akadLocation').value,
+        akad_address: document.getElementById('akadAddress').value,
+        akad_map_url: document.getElementById('akadMapUrl').value,
+        resepsi_date: document.getElementById('resepsiDate').value,
+        resepsi_time: document.getElementById('resepsiTime').value,
+        resepsi_location: document.getElementById('resepsiLocation').value,
+        resepsi_address: document.getElementById('resepsiAddress').value,
+        resepsi_map_url: document.getElementById('resepsiMapUrl').value,
+        quote_text: document.getElementById('quoteText').value,
+        quote_source: document.getElementById('quoteSource').value,
+        music_url: document.getElementById('musicUrl').value
+      };
+      await triggerAutoSave(payload);
+    }
+
+    // Save Gallery photos
+    async function saveGalleryFromTextarea() {
+      const text = document.getElementById('galleryPhotosInput').value;
+      const urls = text.split('\n').map(u => u.trim()).filter(u => u.length > 0);
+      await triggerAutoSave({ gallery_photos: urls });
+      showToast('Galeri foto berhasil disimpan!');
+    }
+
+    // Theme Switcher (RULE 12: DATA TIDAK BOLEH HILANG)
+    async function selectTheme(themeId) {
+      try {
+        setSaveStatus('saving');
+        const res = await fetch(`/api/manage/${managementToken}/theme`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ theme_id: themeId })
+        });
+        const data = await res.json();
+        if (data.success) {
+          updateThemeSelectionUI(themeId);
+          setSaveStatus('saved');
+          showToast(data.message);
+        } else {
+          showToast(data.error || 'Gagal mengganti tema', 'danger');
+        }
+      } catch (err) {
+        showToast('Koneksi terputus', 'danger');
+      }
+    }
+
+    function updateThemeSelectionUI(themeId) {
+      document.querySelectorAll('.theme-card').forEach(card => {
+        if (card.getAttribute('data-theme') === themeId) {
+          card.classList.add('selected');
+        } else {
+          card.classList.remove('selected');
+        }
+      });
+    }
+
+    // Bank Accounts Handling
+    function renderBankAccounts(accounts) {
+      const container = document.getElementById('bankList');
+      if (!accounts || accounts.length === 0) {
+        container.innerHTML = '<p style="font-size: 0.85rem; color: #64748b;">Belum ada rekening bank yang ditambahkan.</p>';
+        return;
+      }
+      container.innerHTML = accounts.map((acc, idx) => `
+        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <strong>${acc.bank_name}</strong>: ${acc.account_number}<br>
+            <small style="color: #64748b;">a.n. ${acc.account_holder}</small>
+          </div>
+          <button type="button" onclick="deleteBankAccount(${idx})" class="btn btn-danger btn-sm">Hapus</button>
+        </div>
+      `).join('');
+    }
+
+    async function addBankAccount() {
+      const bank_name = document.getElementById('newBankName').value.trim();
+      const account_number = document.getElementById('newBankAccNumber').value.trim();
+      const account_holder = document.getElementById('newBankAccHolder').value.trim();
+
+      if (!bank_name || !account_number) {
+        showToast('Nama bank dan nomor rekening wajib diisi.', 'danger');
+        return;
+      }
+
+      const accounts = currentInvitation.bank_accounts || [];
+      accounts.push({ bank_name, account_number, account_holder });
+      await triggerAutoSave({ bank_accounts: accounts });
+      currentInvitation.bank_accounts = accounts;
+      renderBankAccounts(accounts);
+
+      document.getElementById('newBankName').value = '';
+      document.getElementById('newBankAccNumber').value = '';
+      document.getElementById('newBankAccHolder').value = '';
+      showToast('Rekening bank berhasil ditambahkan!');
+    }
+
+    async function deleteBankAccount(idx) {
+      const accounts = currentInvitation.bank_accounts || [];
+      accounts.splice(idx, 1);
+      await triggerAutoSave({ bank_accounts: accounts });
+      currentInvitation.bank_accounts = accounts;
+      renderBankAccounts(accounts);
+      showToast('Rekening dihapus.');
+    }
+
+    // Guest Management (RULE 6: GUEST TOKEN & NAMA TAMU KHUSUS)
+    function renderGuests() {
+      const container = document.getElementById('guestsContainer');
+      if (!guestList || guestList.length === 0) {
+        container.innerHTML = '<p style="text-align: center; color: #64748b; padding: 20px;">Belum ada tamu. Tambahkan nama tamu di atas!</p>';
+        return;
+      }
+
+      const domain = window.location.origin;
+
+      container.innerHTML = guestList.map(guest => {
+        const guestLink = `${domain}/u/${currentInvitation.slug}/${guest.guest_token}`;
+        const waText = encodeURIComponent(
+          `Kepada Yth. Bapak/Ibu/Saudara/i\n*${guest.name}*\n\nTanpa mengurangi rasa hormat, perkenankan kami mengundang Anda untuk menghadiri acara pernikahan kami:\n\n*${currentInvitation.title}*\n\nInformasi lengkap acara & konfirmasi kehadiran dapat diakses melalui tautan berikut:\n${guestLink}\n\nMerupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir dan memberikan doa restu.\n\nTerima kasih.`
+        );
+        const waUrl = `https://api.whatsapp.com/send?${guest.phone ? 'phone=' + guest.phone + '&' : ''}text=${waText}`;
+
+        let statusBadge = '<span class="badge badge-warning">Pending</span>';
+        if (guest.attendance_status === 'hadir') statusBadge = `<span class="badge badge-success">Hadir (${guest.total_pax || 1} orang)</span>`;
+        if (guest.attendance_status === 'tidak_hadir') statusBadge = '<span class="badge badge-danger">Tidak Hadir</span>';
+
+        return `
+          <div class="guest-item">
+            <div class="guest-row">
+              <div>
+                <span class="guest-name">${guest.name}</span>
+                <span class="badge badge-info" style="margin-left: 6px;">${guest.category || 'Tamu'}</span>
+                ${statusBadge}
+              </div>
+              <span class="guest-token">Token: ${guest.guest_token}</span>
+            </div>
+
+            <div style="font-size: 0.8rem; color: #64748b; word-break: break-all;">
+              🔗 ${guestLink}
+            </div>
+
+            <div class="guest-actions" style="margin-top: 4px;">
+              <button onclick="copyToClipboard('${guestLink}', 'Guest Link untuk ${guest.name.replace(/'/g, "\\'")} disalin!')" class="btn btn-secondary btn-sm">
+                📋 Salin Link
+              </button>
+              <a href="${waUrl}" target="_blank" class="btn btn-sm" style="background: #25d366; color: #ffffff; text-decoration: none;">
+                💬 Kirim WhatsApp
+              </a>
+              <a href="${guestLink}" target="_blank" class="btn btn-secondary btn-sm">
+                👁️ Preview
+              </a>
+              <button onclick="deleteGuest(${guest.id}, '${guest.name.replace(/'/g, "\\'")}')" class="btn btn-danger btn-sm" style="margin-left: auto;">
+                Hapus
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Add Guest
+    document.getElementById('addGuestForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('guestNameInput').value.trim();
+      const category = document.getElementById('guestCategoryInput').value;
+      const phone = document.getElementById('guestPhoneInput').value.trim();
+
+      try {
+        const res = await fetch(`/api/manage/${managementToken}/guests`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, category, phone })
+        });
+        const data = await res.json();
+        if (data.success) {
+          guestList.unshift(data.guest);
+          renderGuests();
+          document.getElementById('guestNameInput').value = '';
+          document.getElementById('guestPhoneInput').value = '';
+          showToast(`Tamu ${data.guest.name} berhasil ditambahkan!`);
+        } else {
+          showToast(data.error || 'Gagal menambahkan tamu', 'danger');
+        }
+      } catch (err) {
+        showToast('Koneksi terputus', 'danger');
+      }
+    });
+
+    // Delete Guest
+    async function deleteGuest(id, name) {
+      if (!confirm(`Hapus tamu "${name}"?`)) return;
+      try {
+        const res = await fetch(`/api/manage/${managementToken}/guests/${id}`, { method: 'DELETE' });
+        const data = await res.json();
+        if (data.success) {
+          guestList = guestList.filter(g => g.id !== id);
+          renderGuests();
+          showToast('Tamu berhasil dihapus.');
+        } else {
+          showToast(data.error || 'Gagal menghapus', 'danger');
+        }
+      } catch (err) {
+        showToast('Koneksi terputus', 'danger');
+      }
+    }
+
+    // Render Wishes
+    function renderWishes(wishes) {
+      const container = document.getElementById('wishesContainer');
+      if (!wishes || wishes.length === 0) {
+        container.innerHTML = '<p style="text-align: center; color: #64748b; padding: 20px;">Belum ada ucapan doa dari tamu.</p>';
+        return;
+      }
+      container.innerHTML = wishes.map(w => `
+        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px; margin-bottom: 10px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <strong>${w.sender_name}</strong>
+            <span class="badge ${w.attendance === 'hadir' ? 'badge-success' : 'badge-secondary'}">${w.attendance}</span>
+          </div>
+          <p style="font-size: 0.9rem; color: #334155; line-height: 1.4;">"${w.message}"</p>
+          <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 6px;">
+            ${new Date(w.created_at).toLocaleString('id-ID')}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Share Modal Handling (RULE 9)
+    const shareModal = document.getElementById('shareModal');
+    const openShareBtn = document.getElementById('openShareModalBtn');
+    const closeShareBtn = document.getElementById('closeShareModalBtn');
+    const shareWaBtn = document.getElementById('shareWaBtn');
+    const webShareBtn = document.getElementById('webShareBtn');
+
+    openShareBtn.addEventListener('click', () => {
+      shareModal.classList.add('active');
+    });
+    closeShareBtn.addEventListener('click', () => {
+      shareModal.classList.remove('active');
+    });
+
+    shareWaBtn.addEventListener('click', () => {
+      const link = document.getElementById('sharePublicLink').value;
+      const text = encodeURIComponent(
+        `Assalamu'alaikum Wr. Wb.\n\nTanpa mengurangi rasa hormat, kami mengundang Bapak/Ibu/Saudara/i untuk menghadiri acara pernikahan kami:\n\n*${currentInvitation.title}*\n\nInfo lengkap dapat dilihat pada link berikut:\n${link}\n\nTerima kasih.`
+      );
+      window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
+    });
+
+    webShareBtn.addEventListener('click', async () => {
+      const link = document.getElementById('sharePublicLink').value;
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: currentInvitation.title,
+            text: `Undangan Pernikahan: ${currentInvitation.title}`,
+            url: link
+          });
+        } catch (err) {}
+      } else {
+        copyToClipboard(link, 'Link undangan berhasil disalin!');
+      }
+    });
+
+    // Initialize
+    loadData();
+  </script>
+</body>
+</html>

@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - Undangan Digital V5</title>
+  <link rel="stylesheet" href="/css/common.css">
+  <style>
+    body {
+      background-color: #f1f5f9;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .navbar {
+      background: #0f172a;
+      color: #ffffff;
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .nav-brand {
+      font-size: 1.15rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .nav-brand span {
+      background: #10b981;
+      color: #0f172a;
+      font-size: 0.75rem;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-weight: 800;
+    }
+    .main-container {
+      max-width: 1100px;
+      width: 100%;
+      margin: 24px auto;
+      padding: 0 16px;
+      flex: 1;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      background: #ffffff;
+      border-radius: 14px;
+      padding: 20px;
+      border: 1px solid #e2e8f0;
+      box-shadow: var(--shadow-sm);
+    }
+    .stat-card .label {
+      font-size: 0.85rem;
+      color: #64748b;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .stat-card .value {
+      font-size: 1.85rem;
+      font-weight: 800;
+      color: #0f172a;
+      margin-top: 6px;
+    }
+    .header-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .invitation-card {
+      background: #ffffff;
+      border-radius: 14px;
+      padding: 20px;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      transition: var(--transition);
+    }
+    .invitation-card:hover {
+      box-shadow: var(--shadow-md);
+      border-color: #cbd5e1;
+    }
+    .inv-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .inv-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+    .inv-meta {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-top: 4px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+    .token-box {
+      background: #f8fafc;
+      border: 1px dashed #cbd5e1;
+      padding: 12px 16px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .token-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #475569;
+      text-transform: uppercase;
+    }
+    .token-url {
+      font-family: monospace;
+      font-size: 0.875rem;
+      color: #0369a1;
+      word-break: break-all;
+    }
+    .inv-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+  </style>
+</head>
+<body>
+
+  <header class="navbar">
+    <div class="nav-brand">
+      Undangan Digital <span>ADMIN V5</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <span style="font-size: 0.85rem; color: #94a3b8;">Admin ID: <strong>admin</strong></span>
+      <button id="logoutBtn" class="btn btn-secondary btn-sm" style="background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); color: #ffffff;">Keluar</button>
+    </div>
+  </header>
+
+  <main class="main-container">
+    
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="label">Total Undangan</div>
+        <div class="value" id="statTotal">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Undangan Aktif</div>
+        <div class="value" id="statActive" style="color: #059669;">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Total Tamu Terdaftar</div>
+        <div class="value" id="statGuests" style="color: #2563eb;">0</div>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <div>
+        <h2 style="font-size: 1.35rem; font-weight: 800; color: #0f172a;">Daftar Undangan & Penyewa</h2>
+        <p style="font-size: 0.875rem; color: #64748b;">Kelola akses penyewa, tema, dan status keaktifan undangan.</p>
+      </div>
+      <button id="openCreateModalBtn" class="btn btn-primary">
+        + Buat Undangan Baru
+      </button>
+    </div>
+
+    <div id="invitationList">
+      <div style="text-align: center; padding: 40px; color: #64748b;">Memuat data undangan...</div>
+    </div>
+
+  </main>
+
+  <!-- Modal Buat Undangan -->
+  <div class="modal-backdrop" id="createModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 style="font-weight: 700; font-size: 1.15rem;">Buat Undangan Baru</h3>
+        <button type="button" id="closeCreateModalBtn" style="background: none; border: none; font-size: 1.4rem; cursor: pointer; color: #64748b;">&times;</button>
+      </div>
+      <form id="createInvForm">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Nama Panggilan Pria</label>
+            <input type="text" id="groomNickname" class="form-input" placeholder="Contoh: Andi" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Nama Panggilan Wanita</label>
+            <input type="text" id="brideNickname" class="form-input" placeholder="Contoh: Sinta" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Judul Undangan (Opsional)</label>
+            <input type="text" id="invTitle" class="form-input" placeholder="Otomatis: The Wedding of Andi & Sinta">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Custom Slug URL (Opsional)</label>
+            <input type="text" id="invSlug" class="form-input" placeholder="Contoh: wedding-andi-sinta">
+            <small style="font-size: 0.75rem; color: #64748b;">URL tamu: /u/[slug]/[guestToken]</small>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Pilihan Tema Awal</label>
+            <select id="invTheme" class="form-select">
+              <option value="islami-emerald">Islami Emerald (Hijau Zamrud & Emas Mewah)</option>
+              <option value="rose-gold">Rose Gold (Romantis Elegan & Blush)</option>
+              <option value="modern-minimalist">Modern Minimalist (Slate Monokrom Mewah)</option>
+              <option value="rustic-flora">Rustic Flora (Terracotta & Sage Botanical)</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" id="cancelCreateBtn" class="btn btn-secondary">Batal</button>
+          <button type="submit" id="saveCreateBtn" class="btn btn-primary">Generate Undangan & Link Penyewa</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script>
+    function showToast(msg, type = 'success') {
+      const c = document.getElementById('toastContainer');
+      const t = document.createElement('div');
+      t.className = `toast toast-${type} show`;
+      t.innerText = msg;
+      c.appendChild(t);
+      setTimeout(() => {
+        t.classList.remove('show');
+        setTimeout(() => t.remove(), 300);
+      }, 3000);
+    }
+
+    async function copyToClipboard(text, message = 'Link berhasil disalin!') {
+      try {
+        await navigator.clipboard.writeText(text);
+        showToast(message);
+      } catch (err) {
+        const input = document.createElement('input');
+        input.value = text;
+        document.body.appendChild(input);
+        input.select();
+        document.execCommand('copy');
+        document.body.removeChild(input);
+        showToast(message);
+      }
+    }
+
+    // Load invitations
+    async function loadInvitations() {
+      try {
+        const res = await fetch('/api/admin/invitations');
+        if (res.status === 401) {
+          window.location.href = '/admin/login';
+          return;
+        }
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+
+        const listEl = document.getElementById('invitationList');
+        const invs = data.invitations;
+
+        // Update stats
+        document.getElementById('statTotal').innerText = invs.length;
+        document.getElementById('statActive').innerText = invs.filter(i => i.is_active === 1).length;
+        document.getElementById('statGuests').innerText = invs.reduce((acc, i) => acc + (i.guest_count || 0), 0);
+
+        if (invs.length === 0) {
+          listEl.innerHTML = `
+            <div class="card" style="text-align: center; padding: 40px;">
+              <p style="color: #64748b;">Belum ada undangan yang dibuat.</p>
+            </div>
+          `;
+          return;
+        }
+
+        const domain = window.location.origin;
+
+        listEl.innerHTML = invs.map(inv => {
+          const manageUrl = `${domain}/manage/${inv.management_token}`;
+          const guestDemoUrl = `${domain}/u/${inv.slug}/preview`;
+          const isActive = inv.is_active === 1;
+
+          return `
+            <div class="invitation-card" id="inv-${inv.id}">
+              <div class="inv-top">
+                <div>
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <span class="inv-title">${inv.title}</span>
+                    <span class="badge ${isActive ? 'badge-success' : 'badge-danger'}">
+                      ${isActive ? 'Aktif' : 'Nonaktif'}
+                    </span>
+                    <span class="badge badge-info">${inv.theme_id}</span>
+                  </div>
+                  <div class="inv-meta">
+                    <span>Slug: <strong>${inv.slug}</strong></span>
+                    <span>Tamu: <strong>${inv.guest_count || 0}</strong> orang</span>
+                    <span>Ucapan: <strong>${inv.wish_count || 0}</strong> doa</span>
+                  </div>
+                </div>
+
+                <div class="inv-actions">
+                  <a href="${manageUrl}" target="_blank" class="btn btn-secondary btn-sm" title="Buka Editor Penyewa">
+                    ✏️ Buka Editor
+                  </a>
+                  <button onclick="toggleStatus(${inv.id}, ${isActive ? 0 : 1})" class="btn ${isActive ? 'btn-secondary' : 'btn-primary'} btn-sm">
+                    ${isActive ? 'Nonaktifkan' : 'Aktifkan'}
+                  </button>
+                  <button onclick="deleteInvitation(${inv.id}, '${inv.title.replace(/'/g, "\\'")}')" class="btn btn-danger btn-sm">
+                    Hapus
+                  </button>
+                </div>
+              </div>
+
+              <!-- Management Link Box (Penyewa) -->
+              <div class="token-box">
+                <div>
+                  <div class="token-label">🔗 MANAGEMENT LINK (Berikan Link Ini ke Penyewa):</div>
+                  <div class="token-url">${manageUrl}</div>
+                </div>
+                <button onclick="copyToClipboard('${manageUrl}', 'Management Link penyewa berhasil disalin!')" class="btn btn-primary btn-sm">
+                  📋 Salin Link Penyewa
+                </button>
+              </div>
+
+              <!-- Guest Link Base -->
+              <div style="font-size: 0.8rem; color: #64748b; display: flex; align-items: center; justify-content: space-between;">
+                <span>Format Guest Link: <code>${domain}/u/${inv.slug}/[guestToken]</code></span>
+                <a href="${guestDemoUrl}" target="_blank" style="color: #059669; text-decoration: none; font-weight: 600;">
+                  👁️ Preview Undangan
+                </a>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+      } catch (err) {
+        showToast(err.message, 'danger');
+      }
+    }
+
+    // Toggle active status
+    async function toggleStatus(id, newStatus) {
+      try {
+        const res = await fetch(`/api/admin/invitations/${id}/status`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ is_active: newStatus })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast(newStatus ? 'Undangan berhasil diaktifkan!' : 'Undangan berhasil dinonaktifkan.');
+          loadInvitations();
+        } else {
+          showToast(data.error || 'Gagal mengubah status', 'danger');
+        }
+      } catch (err) {
+        showToast(err.message, 'danger');
+      }
+    }
+
+    // Delete invitation
+    async function deleteInvitation(id, title) {
+      if (!confirm(`Apakah Anda yakin ingin menghapus undangan "${title}" beserta seluruh data tamu dan ucapannya? Tindakan ini permanen!`)) {
+        return;
+      }
+      try {
+        const res = await fetch(`/api/admin/invitations/${id}`, { method: 'DELETE' });
+        const data = await res.json();
+        if (data.success) {
+          showToast('Undangan berhasil dihapus.');
+          loadInvitations();
+        } else {
+          showToast(data.error || 'Gagal menghapus', 'danger');
+        }
+      } catch (err) {
+        showToast(err.message, 'danger');
+      }
+    }
+
+    // Logout
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      await fetch('/api/admin/logout', { method: 'POST' });
+      window.location.href = '/admin/login';
+    });
+
+    // Create Modal handling
+    const modal = document.getElementById('createModal');
+    const openBtn = document.getElementById('openCreateModalBtn');
+    const closeBtn = document.getElementById('closeCreateModalBtn');
+    const cancelBtn = document.getElementById('cancelCreateBtn');
+    const form = document.getElementById('createInvForm');
+
+    openBtn.addEventListener('click', () => modal.classList.add('active'));
+    closeBtn.addEventListener('click', () => modal.classList.remove('active'));
+    cancelBtn.addEventListener('click', () => modal.classList.remove('active'));
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const saveBtn = document.getElementById('saveCreateBtn');
+      saveBtn.disabled = true;
+      saveBtn.innerText = 'Membuat...';
+
+      const groomNickname = document.getElementById('groomNickname').value.trim();
+      const brideNickname = document.getElementById('brideNickname').value.trim();
+      const title = document.getElementById('invTitle').value.trim();
+      const slug = document.getElementById('invSlug').value.trim();
+      const theme_id = document.getElementById('invTheme').value;
+
+      try {
+        const res = await fetch('/api/admin/invitations', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ groom_nickname: groomNickname, bride_nickname: brideNickname, title, slug, theme_id })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast('Undangan baru & Management Link berhasil dibuat!');
+          modal.classList.remove('active');
+          form.reset();
+          loadInvitations();
+        } else {
+          showToast(data.error || 'Gagal membuat undangan', 'danger');
+        }
+      } catch (err) {
+        showToast(err.message, 'danger');
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.innerText = 'Generate Undangan & Link Penyewa';
+      }
+    });
+
+    // Initial load
+    loadInvitations();
+  </script>
+</body>
+</html>
